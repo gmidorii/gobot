@@ -19,3 +19,6 @@
 .glide/
 
 .idea
+
+# config file
+config.toml
