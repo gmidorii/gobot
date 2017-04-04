@@ -9,6 +9,8 @@ import (
 
 	"bytes"
 
+	"strings"
+
 	"github.com/BurntSushi/toml"
 	"github.com/nlopes/slack"
 )
@@ -44,15 +46,12 @@ func run(api *slack.Client) int {
 		case msg := <-rtm.IncomingEvents:
 			switch ev := msg.Data.(type) {
 			case *slack.MessageEvent:
-				switch ev.Text {
-				case "mocha-release":
+				if strings.Contains(ev.Text, "mocha-release") {
 					post, err := post()
 					if err != nil {
 						log.Println(err)
 					}
 					rtm.SendMessage(rtm.NewOutgoingMessage(post, ev.Channel))
-				default:
-					log.Println("No response")
 				}
 			case *slack.InvalidAuthEvent:
 				log.Println("Error")
