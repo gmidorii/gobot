@@ -11,9 +11,13 @@ import (
 
 	"strings"
 
+	"time"
+
 	"github.com/BurntSushi/toml"
 	"github.com/nlopes/slack"
 )
+
+const layout = "2006/01/02"
 
 type Release struct {
 	Date string
@@ -52,6 +56,24 @@ func run(api *slack.Client) int {
 						log.Println(err)
 					}
 					rtm.SendMessage(rtm.NewOutgoingMessage(post, ev.Channel))
+				}
+
+				if strings.Contains(ev.Text, "mocha-change-day") {
+					args := strings.Split(ev.Text, " ")
+					if len(args) != 2 {
+						rtm.SendMessage(rtm.NewOutgoingMessage("mocha-change-day [date:yyyy/MM/dd]", ev.Channel))
+						continue
+					}
+					date := args[1]
+					t, err := time.Parse(layout, date)
+					if err != nil {
+						rtm.SendMessage(rtm.NewOutgoingMessage("日付の形式まちがいです yyyy/MM/dd", ev.Channel))
+						continue
+					}
+					if t.Weekday() == time.Sunday || t.Weekday() == time.Saturday {
+						rtm.SendMessage(rtm.NewOutgoingMessage("休日は指定なしで..:darkness:", ev.Channel))
+						continue
+					}
 				}
 			case *slack.InvalidAuthEvent:
 				log.Println("Error")
