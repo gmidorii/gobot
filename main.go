@@ -13,6 +13,9 @@ import (
 
 	"time"
 
+	"bufio"
+	"strconv"
+
 	"github.com/BurntSushi/toml"
 	"github.com/nlopes/slack"
 )
@@ -70,10 +73,33 @@ func run(api *slack.Client) int {
 						rtm.SendMessage(rtm.NewOutgoingMessage("日付の形式まちがいです yyyy/MM/dd", ev.Channel))
 						continue
 					}
-					if t.Weekday() == time.Sunday || t.Weekday() == time.Saturday {
-						rtm.SendMessage(rtm.NewOutgoingMessage("休日は指定なしで..:darkness:", ev.Channel))
+					if isHoliday(t) {
+						rtm.SendMessage(rtm.NewOutgoingMessage("休日の指定はなしで..:darkness:", ev.Channel))
 						continue
 					}
+					now := time.Now()
+					var count int
+					for t.Format(layout) != now.Format(layout) {
+						if !isHoliday(now) {
+							count += 1
+						}
+						now = now.AddDate(0, 0, 1)
+					}
+
+					release := Release{
+						Date: t.Format(layout),
+						Day:  strconv.Itoa(count),
+					}
+					file, err := os.Create("args.toml")
+					if err != nil {
+						continue
+					}
+					w := bufio.NewWriter(file)
+					encoder := toml.NewEncoder(w)
+					encoder.Encode(release)
+
+					p, _ := post()
+					rtm.SendMessage(rtm.NewOutgoingMessage(p, ev.Channel))
 				}
 			case *slack.InvalidAuthEvent:
 				log.Println("Error")
@@ -100,4 +126,11 @@ func post() (string, error) {
 	var buf bytes.Buffer
 	t.Execute(&buf, release)
 	return buf.String(), nil
+}
+
+func isHoliday(t time.Time) bool {
+	if t.Weekday() == time.Sunday || t.Weekday() == time.Saturday {
+		return true
+	}
+	return false
 }
