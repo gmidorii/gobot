@@ -16,6 +16,8 @@ import (
 	"bufio"
 	"strconv"
 
+	"errors"
+
 	"github.com/BurntSushi/toml"
 	"github.com/nlopes/slack"
 )
@@ -77,13 +79,9 @@ func run(api *slack.Client) int {
 						rtm.SendMessage(rtm.NewOutgoingMessage("休日の指定はなしで..:darkness:", ev.Channel))
 						continue
 					}
-					now := time.Now()
-					var count int
-					for t.Format(layout) != now.Format(layout) {
-						if !isHoliday(now) {
-							count += 1
-						}
-						now = now.AddDate(0, 0, 1)
+					count, err := calcBusinessDay(t)
+					if err != nil {
+						rtm.SendMessage(rtm.NewOutgoingMessage(err.Error(), ev.Channel))
 					}
 
 					release := Release{
@@ -133,4 +131,18 @@ func isHoliday(t time.Time) bool {
 		return true
 	}
 	return false
+}
+
+func calcBusinessDay(t time.Time) (int, error) {
+	now := time.Now()
+	count := 0
+	if t.Before(now) {
+		return count, errors.New("arg time must be after now")
+	}
+	for t.Format(layout) != now.Format(layout) {
+		if !isHoliday(now) {
+			count += 1
+		}
+		now = now.AddDate(0, 0, 1)
+	}
 }
