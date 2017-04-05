@@ -145,4 +145,6 @@ func calcBusinessDay(t time.Time) (int, error) {
 		}
 		now = now.AddDate(0, 0, 1)
 	}
+
+	return count, nil
 }
