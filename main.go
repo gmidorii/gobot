@@ -111,6 +111,16 @@ func post() (string, error) {
 		return "", err
 	}
 
+	time, err := time.Parse(layout, release.Date)
+	if err != nil {
+		return "", err
+	}
+	count, err := calcBusinessDay(time)
+	if err != nil {
+		return "", err
+	}
+	release.Day = strconv.Itoa(count)
+
 	t, err := template.ParseFiles("template.txt")
 	if err != nil {
 		return "", err
