@@ -60,28 +60,28 @@ func run(api *slack.Client) int {
 					if err != nil {
 						log.Println(err)
 					}
-					rtm.SendMessage(rtm.NewOutgoingMessage(post, ev.Channel))
+					sendSlack(rtm, ev.Channel, post)
 				}
 
 				if strings.Contains(ev.Text, "mocha-change-day") {
 					args := strings.Split(ev.Text, " ")
 					if len(args) != 2 {
-						rtm.SendMessage(rtm.NewOutgoingMessage("mocha-change-day [date:yyyy/MM/dd]", ev.Channel))
+						sendSlack(rtm, ev.Channel, "mocha-change-day [date:yyyy/MM/dd]")
 						continue
 					}
 					date := args[1]
 					t, err := time.Parse(layout, date)
 					if err != nil {
-						rtm.SendMessage(rtm.NewOutgoingMessage("日付の形式まちがいです yyyy/MM/dd", ev.Channel))
+						sendSlack(rtm, ev.Channel, "日付の形式まちがいです yyyy/MM/dd")
 						continue
 					}
 					if isHoliday(t) {
-						rtm.SendMessage(rtm.NewOutgoingMessage("休日の指定はなしで..:darkness:", ev.Channel))
+						sendSlack(rtm, ev.Channel, "休日の指定はなしで..:darkness:")
 						continue
 					}
 					count, err := calcBusinessDay(t)
 					if err != nil {
-						rtm.SendMessage(rtm.NewOutgoingMessage(err.Error(), ev.Channel))
+						sendSlack(rtm, ev.Channel, err.Error())
 					}
 
 					release := Release{
@@ -91,7 +91,7 @@ func run(api *slack.Client) int {
 					update(release)
 
 					p, _ := post()
-					rtm.SendMessage(rtm.NewOutgoingMessage(p, ev.Channel))
+					sendSlack(rtm, ev.Channel, p)
 				}
 			case *slack.InvalidAuthEvent:
 				log.Println("Error")
@@ -151,4 +151,8 @@ func update(release Release) error {
 	w := bufio.NewWriter(file)
 	encoder := toml.NewEncoder(w)
 	return encoder.Encode(release)
+}
+
+func sendSlack(rtm *slack.RTM, ch, post string) {
+	rtm.SendMessage(rtm.NewOutgoingMessage(post, ch))
 }
