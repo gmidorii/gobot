@@ -88,13 +88,7 @@ func run(api *slack.Client) int {
 						Date: t.Format(layout),
 						Day:  strconv.Itoa(count),
 					}
-					file, err := os.Create("args.toml")
-					if err != nil {
-						continue
-					}
-					w := bufio.NewWriter(file)
-					encoder := toml.NewEncoder(w)
-					encoder.Encode(release)
+					update(release)
 
 					p, _ := post()
 					rtm.SendMessage(rtm.NewOutgoingMessage(p, ev.Channel))
@@ -147,4 +141,14 @@ func calcBusinessDay(t time.Time) (int, error) {
 	}
 
 	return count, nil
+}
+
+func update(release Release) error {
+	file, err := os.Create("args.toml")
+	if err != nil {
+		return err
+	}
+	w := bufio.NewWriter(file)
+	encoder := toml.NewEncoder(w)
+	return encoder.Encode(release)
 }
