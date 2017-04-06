@@ -39,12 +39,8 @@ type Config struct {
 }
 
 func main() {
-	f, err := ioutil.ReadFile("config.toml")
+	config, err := readConfig("config.toml")
 	if err != nil {
-		log.Fatalln(err)
-	}
-	var config Config
-	if _, err := toml.Decode(string(f), &config); err != nil {
 		log.Fatalln(err)
 	}
 	api := slack.New(config.Token)
@@ -175,4 +171,16 @@ func update(release Release) error {
 
 func sendSlack(rtm *slack.RTM, ch, post string) {
 	rtm.SendMessage(rtm.NewOutgoingMessage(post, ch))
+}
+
+func readConfig(file string) (Config, error) {
+	f, err := ioutil.ReadFile(file)
+	if err != nil {
+		return Config{}, err
+	}
+	var config Config
+	if _, err := toml.Decode(string(f), &config); err != nil {
+		return Config{}, err
+	}
+	return config, nil
 }
