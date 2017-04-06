@@ -30,7 +30,8 @@ type Release struct {
 }
 
 type Config struct {
-	Token string
+	Token    string
+	UserHash string
 }
 
 func main() {
@@ -43,10 +44,10 @@ func main() {
 		log.Fatalln(err)
 	}
 	api := slack.New(config.Token)
-	os.Exit(run(api))
+	os.Exit(run(api, config.UserHash))
 }
 
-func run(api *slack.Client) int {
+func run(api *slack.Client, user string) int {
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
 
@@ -55,12 +56,8 @@ func run(api *slack.Client) int {
 		case msg := <-rtm.IncomingEvents:
 			switch ev := msg.Data.(type) {
 			case *slack.MessageEvent:
-				if strings.Contains(ev.Text, "mocha-release") {
-					post, err := post()
-					if err != nil {
-						log.Println(err)
-					}
-					sendSlack(rtm, ev.Channel, post)
+				if !strings.Contains(ev.Text, user) {
+					continue
 				}
 
 				if strings.Contains(ev.Text, "mocha-change-day") {
