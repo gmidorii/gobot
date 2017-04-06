@@ -72,3 +72,15 @@ func TestIsHoliday(t *testing.T) {
 		t.Error("Businessdaay judge is failed")
 	}
 }
+
+func TestReadRelease(t *testing.T) {
+	release, err := readRelease("test/args.toml")
+	if err != nil {
+		t.Error(err)
+	}
+	if release.Date != "2017/04/03" || release.Day != "10" {
+		t.Error("Not Expected Relase")
+		t.Log("Config.Date: " + release.Date)
+		t.Log("Config.Day: " + release.Day)
+	}
+}

@@ -109,12 +109,8 @@ func run(api *slack.Client, user string) int {
 }
 
 func post() (string, error) {
-	args, err := ioutil.ReadFile("args.toml")
+	release, err := readRelease("args.toml")
 	if err != nil {
-		return "", err
-	}
-	var release Release
-	if _, err := toml.Decode(string(args), &release); err != nil {
 		return "", err
 	}
 
@@ -183,4 +179,16 @@ func readConfig(file string) (Config, error) {
 		return Config{}, err
 	}
 	return config, nil
+}
+
+func readRelease(file string) (Release, error) {
+	args, err := ioutil.ReadFile(file)
+	if err != nil {
+		return Release{}, err
+	}
+	var release Release
+	if _, err := toml.Decode(string(args), &release); err != nil {
+		return Release{}, err
+	}
+	return release, nil
 }
