@@ -22,11 +22,12 @@ import (
 	"github.com/nlopes/slack"
 )
 
-const layout = "2006/01/02"
-
 const (
+	layout     = "2006/01/02"
 	changeDate = "change-date"
 )
+
+var now = time.Now()
 
 type Release struct {
 	Date string
@@ -144,7 +145,6 @@ func isHoliday(t time.Time) bool {
 }
 
 func calcBusinessDay(t time.Time) (int, error) {
-	now := time.Now()
 	if t.Before(now) {
 		return 0, errors.New("arg time must be after now")
 	}

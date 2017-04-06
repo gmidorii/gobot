@@ -48,3 +48,16 @@ func TestCalcBusinessDay_BeforeTime(t *testing.T) {
 		t.Error("Expected error is not output")
 	}
 }
+
+func TestCalcBusinessDay(t *testing.T) {
+	now, _ = time.Parse("2006/01/02", "2017/04/03")
+	date, _ := time.Parse("2006/01/02", "2017/04/28")
+	count, err := calcBusinessDay(date)
+	if err != nil {
+		t.Error(err)
+	}
+	if count != 19 {
+		t.Error("Count business day failed")
+		t.Log(count)
+	}
+}
