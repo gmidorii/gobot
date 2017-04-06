@@ -61,3 +61,14 @@ func TestCalcBusinessDay(t *testing.T) {
 		t.Log(count)
 	}
 }
+
+func TestIsHoliday(t *testing.T) {
+	holiday, _ := time.Parse("2006/01/02", "2017/04/02")
+	if isHoliday(holiday) != true {
+		t.Error("Holiday judge is failed")
+	}
+	businessday, _ := time.Parse("2006/01/02", "2017/04/03")
+	if isHoliday(businessday) != false {
+		t.Error("Businessdaay judge is failed")
+	}
+}
