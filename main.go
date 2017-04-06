@@ -24,6 +24,10 @@ import (
 
 const layout = "2006/01/02"
 
+const (
+	changeDate = "change-date"
+)
+
 type Release struct {
 	Date string
 	Day  string
@@ -60,13 +64,14 @@ func run(api *slack.Client, user string) int {
 					continue
 				}
 
-				if strings.Contains(ev.Text, "mocha-change-day") {
-					args := strings.Split(ev.Text, " ")
+				if c := strings.Index(ev.Text, changeDate); c != -1 {
+					args := strings.Split(ev.Text[c:], " ")
 					if len(args) != 2 {
-						sendSlack(rtm, ev.Channel, "mocha-change-day [date:yyyy/MM/dd]")
+						sendSlack(rtm, ev.Channel, changeDate+" [date:yyyy/MM/dd]")
 						continue
 					}
 					date := args[1]
+					log.Println(date)
 					t, err := time.Parse(layout, date)
 					if err != nil {
 						sendSlack(rtm, ev.Channel, "日付の形式まちがいです yyyy/MM/dd")
