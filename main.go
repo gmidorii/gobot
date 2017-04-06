@@ -145,10 +145,10 @@ func isHoliday(t time.Time) bool {
 
 func calcBusinessDay(t time.Time) (int, error) {
 	now := time.Now()
-	count := 0
 	if t.Before(now) {
-		return count, errors.New("arg time must be after now")
+		return 0, errors.New("arg time must be after now")
 	}
+	count := 0
 	for t.Format(layout) != now.Format(layout) {
 		if !isHoliday(now) {
 			count += 1

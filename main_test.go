@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"time"
+
 	"github.com/BurntSushi/toml"
 )
 
@@ -36,5 +38,13 @@ func TestUpdate(t *testing.T) {
 		t.Error("Not Expected Release")
 		t.Log("Release.Date: " + actual.Date)
 		t.Log("Release.Day: " + actual.Day)
+	}
+}
+
+func TestCalcBusinessDay_BeforeTime(t *testing.T) {
+	past, _ := time.Parse("2006/01/02", "2000/04/03")
+	_, err := calcBusinessDay(past)
+	if err.Error() != "arg time must be after now" {
+		t.Error("Expected error is not output")
 	}
 }
