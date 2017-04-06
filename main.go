@@ -39,7 +39,7 @@ type Config struct {
 }
 
 func main() {
-	config, err := readConfig("config.toml")
+	config, err := readConfig("config-test.toml")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -87,7 +87,7 @@ func run(api *slack.Client, user string) int {
 						Date: t.Format(layout),
 						Day:  strconv.Itoa(count),
 					}
-					err = update(release)
+					err = update(release, "args.toml")
 					if err != nil {
 						sendSlack(rtm, ev.Channel, "update failed")
 						log.Println(err)
@@ -159,12 +159,12 @@ func calcBusinessDay(t time.Time) (int, error) {
 	return count, nil
 }
 
-func update(release Release) error {
-	file, err := os.Create("args.toml")
+func update(release Release, file string) error {
+	f, err := os.Create(file)
 	if err != nil {
 		return err
 	}
-	w := bufio.NewWriter(file)
+	w := bufio.NewWriter(f)
 	encoder := toml.NewEncoder(w)
 	return encoder.Encode(release)
 }
