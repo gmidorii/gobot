@@ -43,16 +43,16 @@ func TestUpdate(t *testing.T) {
 
 func TestCalcBusinessDay_BeforeTime(t *testing.T) {
 	past, _ := time.Parse("2006/01/02", "2000/04/03")
-	_, err := calcBusinessDay(past)
+	_, err := calcBusinessDay(past, time.Now())
 	if err.Error() != "arg time must be after now" {
 		t.Error("Expected error is not output")
 	}
 }
 
 func TestCalcBusinessDay(t *testing.T) {
-	now, _ = time.Parse("2006/01/02", "2017/04/03")
+	now, _ := time.Parse("2006/01/02", "2017/04/03")
 	date, _ := time.Parse("2006/01/02", "2017/04/28")
-	count, err := calcBusinessDay(date)
+	count, err := calcBusinessDay(date, now)
 	if err != nil {
 		t.Error(err)
 	}

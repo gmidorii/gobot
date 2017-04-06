@@ -23,11 +23,12 @@ import (
 )
 
 const (
-	layout     = "2006/01/02"
-	changeDate = "change-date"
+	layout       = "2006/01/02"
+	changeDate   = "change-date"
+	argsFile     = "resources/args.toml"
+	configFile   = "resources/config.toml"
+	templateFile = "resources/template.txt"
 )
-
-var now = time.Now()
 
 type Release struct {
 	Date string
@@ -40,7 +41,7 @@ type Config struct {
 }
 
 func main() {
-	config, err := readConfig("config-test.toml")
+	config, err := readConfig(configFile)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -78,7 +79,7 @@ func run(api *slack.Client, user string) int {
 						sendSlack(rtm, ev.Channel, "休日の指定はなしで..:darkness:")
 						continue
 					}
-					count, err := calcBusinessDay(t)
+					count, err := calcBusinessDay(t, time.Now())
 					if err != nil {
 						sendSlack(rtm, ev.Channel, err.Error())
 						continue
@@ -88,16 +89,16 @@ func run(api *slack.Client, user string) int {
 						Date: t.Format(layout),
 						Day:  strconv.Itoa(count),
 					}
-					err = update(release, "args.toml")
+					err = update(release, argsFile)
 					if err != nil {
 						sendSlack(rtm, ev.Channel, "update failed")
 						log.Println(err)
 						continue
 					}
 				}
-				p, err := post()
+				p, err := createText(argsFile, templateFile)
 				if err != nil {
-					sendSlack(rtm, ev.Channel, "post data failed")
+					sendSlack(rtm, ev.Channel, "createText data failed")
 				}
 				sendSlack(rtm, ev.Channel, p)
 			case *slack.InvalidAuthEvent:
@@ -108,23 +109,23 @@ func run(api *slack.Client, user string) int {
 	}
 }
 
-func post() (string, error) {
-	release, err := readRelease("args.toml")
+func createText(args, temp string) (string, error) {
+	release, err := readRelease(args)
 	if err != nil {
 		return "", err
 	}
 
-	time, err := time.Parse(layout, release.Date)
+	date, err := time.Parse(layout, release.Date)
 	if err != nil {
 		return "", err
 	}
-	count, err := calcBusinessDay(time)
+	count, err := calcBusinessDay(date, time.Now())
 	if err != nil {
 		return "", err
 	}
 	release.Day = strconv.Itoa(count)
 
-	t, err := template.ParseFiles("template.txt")
+	t, err := template.ParseFiles(temp)
 	if err != nil {
 		return "", err
 	}
@@ -140,7 +141,7 @@ func isHoliday(t time.Time) bool {
 	return false
 }
 
-func calcBusinessDay(t time.Time) (int, error) {
+func calcBusinessDay(t time.Time, now time.Time) (int, error) {
 	if t.Before(now) {
 		return 0, errors.New("arg time must be after now")
 	}
