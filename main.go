@@ -84,17 +84,25 @@ func run(api *slack.Client, user string) int {
 					count, err := calcBusinessDay(t)
 					if err != nil {
 						sendSlack(rtm, ev.Channel, err.Error())
+						continue
 					}
 
 					release := Release{
 						Date: t.Format(layout),
 						Day:  strconv.Itoa(count),
 					}
-					update(release)
-
-					p, _ := post()
-					sendSlack(rtm, ev.Channel, p)
+					err = update(release)
+					if err != nil {
+						sendSlack(rtm, ev.Channel, "update failed")
+						log.Println(err)
+						continue
+					}
 				}
+				p, err := post()
+				if err != nil {
+					sendSlack(rtm, ev.Channel, "post data failed")
+				}
+				sendSlack(rtm, ev.Channel, p)
 			case *slack.InvalidAuthEvent:
 				log.Println("Error")
 				return 1
