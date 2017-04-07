@@ -52,6 +52,7 @@ func main() {
 func run(api *slack.Client, user string) int {
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
+	log.Println("gobot start up")
 
 	for {
 		select {
