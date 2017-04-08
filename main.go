@@ -57,6 +57,8 @@ func run(api *slack.Client, user string) int {
 	for {
 		select {
 		case msg := <-rtm.IncomingEvents:
+			log.Println(msg.Type)
+			log.Println(msg.Data)
 			switch ev := msg.Data.(type) {
 			case *slack.MessageEvent:
 				if !strings.Contains(ev.Text, user) {
