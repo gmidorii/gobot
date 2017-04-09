@@ -1,4 +1,4 @@
-FROM alpine:3.4
+FROM golang:1.8.1-alpine
 
 RUN mkdir -p /opt/gobot/resources
 
