@@ -65,6 +65,7 @@ func run(api *slack.Client, user string) int {
 					continue
 				}
 
+				now := time.Now()
 				if c := strings.Index(ev.Text, changeDate); c != -1 {
 					args := strings.Split(ev.Text[c:], " ")
 					if len(args) != 2 {
@@ -82,7 +83,7 @@ func run(api *slack.Client, user string) int {
 						sendSlack(rtm, ev.Channel, "休日の指定はなしで..:darkness:")
 						continue
 					}
-					count, err := calcBusinessDay(t, time.Now())
+					count, err := calcBusinessDay(t, now)
 					if err != nil {
 						sendSlack(rtm, ev.Channel, err.Error())
 						continue
@@ -99,7 +100,7 @@ func run(api *slack.Client, user string) int {
 						continue
 					}
 				}
-				p, err := createText(argsFile, templateFile)
+				p, err := createText(argsFile, templateFile, now)
 				if err != nil {
 					sendSlack(rtm, ev.Channel, "createText data failed")
 				}
@@ -112,7 +113,7 @@ func run(api *slack.Client, user string) int {
 	}
 }
 
-func createText(args, temp string) (string, error) {
+func createText(args, temp string, now time.Time) (string, error) {
 	release, err := readRelease(args)
 	if err != nil {
 		return "", err
@@ -122,7 +123,7 @@ func createText(args, temp string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	count, err := calcBusinessDay(date, time.Now())
+	count, err := calcBusinessDay(date, now)
 	if err != nil {
 		return "", err
 	}

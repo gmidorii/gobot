@@ -23,8 +23,8 @@ func TestReadConfig(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	expected := Release{
-		Date: "2017/04/03",
-		Day:  "10",
+		Date: "2017/04/04",
+		Day:  "1",
 	}
 	update(expected, "test/args.toml")
 
@@ -78,9 +78,26 @@ func TestReadRelease(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if release.Date != "2017/04/03" || release.Day != "10" {
+	if release.Date != "2017/04/04" || release.Day != "1" {
 		t.Error("Not Expected Relase")
 		t.Log("Config.Date: " + release.Date)
 		t.Log("Config.Day: " + release.Day)
+	}
+}
+
+func TestCreateText(t *testing.T) {
+	actual, err := createText("test/args.toml", "test/template.txt",
+		time.Date(2017, 4, 3, 0, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Error(err)
+	}
+	expected := `次回リリース日は ` + "`2017/04/04`" + ` です!!
+
+営業日的には ` + "`1`" + ` 日後です!!
+`
+	if expected != actual {
+		t.Error("Not created expected text")
+		t.Log(actual)
+		t.Log(expected)
 	}
 }
