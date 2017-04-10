@@ -1,4 +1,4 @@
-FROM golang:1.8.1-alpine
+FROM gcr.io/google-appengine/golang
 
 RUN mkdir -p /opt/gobot/resources
 
